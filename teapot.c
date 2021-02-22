@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
 
         // just write data to the new socket when it is ready
         bzero(transferBuffer,256);
-        charsTransferred = read(newSocketFileDescriptor,transferBuffer,255);
+        charsTransferred = recv(newSocketFileDescriptor,transferBuffer,255,0);
         fprintf(stdout,"Read %i characters in (%s)\n",charsTransferred,transferBuffer);
 
         if (charsTransferred < 0) {
@@ -88,15 +88,15 @@ int main(int argc, char *argv[]) {
         fprintf(stdout,"Beginning transmission of http response:\n");
         // write the http response from above
         for (size_t i = 0; strncmp(httpResponse[i],"\0",strlen(httpResponse[i])); i++) {
-            charsTransferred = write(newSocketFileDescriptor,httpResponse[i],strlen(httpResponse[i]));
+            charsTransferred = send(newSocketFileDescriptor,httpResponse[i],strlen(httpResponse[i]),0);
             if (charsTransferred < 0) {
                 error("Error during transmission of http response");
             }
 
-            fprintf(stdout,"Transferred http response line %i (%s), %i bytes written", i,httpResponse[i],charsTransferred);
+            fprintf(stdout,"Transferred http response line %li (%s), %i bytes written", i,httpResponse[i],charsTransferred);
         }
 
         // close the client socket!
-        close(newSocketFileDescriptor);
+        shutdown(newSocketFileDescriptor,SHUT_RDWR);
     }
 }
